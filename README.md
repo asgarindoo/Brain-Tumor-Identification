@@ -1,4 +1,4 @@
-# Proses Citra dan Ekstraksi Fitur untuk Data Tumor Otak
+# Brain Tumor Identification
 
 ## Deskripsi
 Kode ini bertujuan untuk memuat data citra tumor otak dari dua folder yang berbeda ("yes" dan "no"), melakukan proses pra-pemrosesan, termasuk resize, segmentasi, dan ekstraksi fitur, dan akhirnya
