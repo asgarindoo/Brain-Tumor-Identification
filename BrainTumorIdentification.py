@@ -38,7 +38,8 @@ def process_image_with_resize(img):
     
     # Thresholding manual pada gambar grayscale
     threshold_value = 128  # Contoh nilai threshold
-    _, thresholded_img = cv2.threshold(img_resized, threshold_value, 255, cv2.THRESH_BINARY)
+    thresholded_img = np.zeros_like(img_resized)
+    thresholded_img[img_resized > threshold_value] = 255
 
     # Terapkan operasi morfologi (Contoh: Erosi manual)
     kernel_size = (5, 5)
@@ -57,50 +58,50 @@ def erode_image(img, kernel, iterations):
     return eroded_img
 
 # Fungsi untuk melakukan operasi morfologi erosi manual
-def manual_erode(img, kernel, iterations=1):
-    # Mendapatkan dimensi citra
-    height, width = img.shape
+# def manual_erode(img, kernel, iterations=1):
+#     # Mendapatkan dimensi citra
+#     height, width = img.shape
     
-    # Mendapatkan dimensi kernel
-    k_height, k_width = kernel.shape
+#     # Mendapatkan dimensi kernel
+#     k_height, k_width = kernel.shape
     
-    # Mendapatkan ukuran padding
-    pad_height = k_height // 2
-    pad_width = k_width // 2
+#     # Mendapatkan ukuran padding
+#     pad_height = k_height // 2
+#     pad_width = k_width // 2
     
-    # Buat citra hasil erosi
-    eroded_img = np.zeros((height, width), dtype=np.uint8)
+#     # Buat citra hasil erosi
+#     eroded_img = np.zeros((height, width), dtype=np.uint8)
     
-    # Looping melalui jumlah iterasi
-    for _ in range(iterations):
-        # Looping melalui citra
-        for i in range(pad_height, height - pad_height):
-            for j in range(pad_width, width - pad_width):
-                # Inisialisasi nilai minimum
-                min_val = 255
+#     # Looping melalui jumlah iterasi
+#     for _ in range(iterations):
+#         # Looping melalui citra
+#         for i in range(pad_height, height - pad_height):
+#             for j in range(pad_width, width - pad_width):
+#                 # Inisialisasi nilai minimum
+#                 min_val = 255
                 
-                # Looping melalui kernel
-                for m in range(k_height):
-                    for n in range(k_width):
-                        # Koordinat citra
-                        x = i + m - pad_height
-                        y = j + n - pad_width
+#                 # Looping melalui kernel
+#                 for m in range(k_height):
+#                     for n in range(k_width):
+#                         # Koordinat citra
+#                         x = i + m - pad_height
+#                         y = j + n - pad_width
                         
-                        # Periksa apakah di dalam batas citra
-                        if x >= 0 and x < height and y >= 0 and y < width:
-                            # Peroleh nilai minimum
-                            min_val = min(min_val, img[x, y])
+#                         # Periksa apakah di dalam batas citra
+#                         if x >= 0 and x < height and y >= 0 and y < width:
+#                             # Peroleh nilai minimum
+#                             min_val = min(min_val, img[x, y])
                 
-                # Tetapkan nilai minimum sebagai nilai piksel erosi
-                eroded_img[i, j] = min_val
+#                 # Tetapkan nilai minimum sebagai nilai piksel erosi
+#                 eroded_img[i, j] = min_val
         
-        # Perbarui citra input dengan citra hasil erosi untuk iterasi selanjutnya
-        img = eroded_img.copy()
+#         # Perbarui citra input dengan citra hasil erosi untuk iterasi selanjutnya
+#         img = eroded_img.copy()
     
-    return eroded_img
+#     return eroded_img
 
 
-# Fungsi untuk melakukan ekstraksi fitur manual dari citra
+# #Fungsi untuk melakukan ekstraksi fitur manual dari citra
 def extract_features(img):
     # Temukan kontur dari citra
     contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
