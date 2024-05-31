@@ -30,7 +30,7 @@ data = data_no + data_yes
 
 # Fungsi untuk melakukan resize, segmentasi, dan ekstraksi fitur
 def process_image_with_resize(img):
-    global eroded_img
+    global eroded_img, thresholded_img
     
     # Resize citra
     target_size = (400, 400)
@@ -166,7 +166,9 @@ if img is not None:
 
         # Tampilkan citra-citra yang diproses (opsional)
         cv2.imshow('Original Image', img)
-        cv2.imshow('Segmented Image', eroded_img)
+        # Menampilkan citra thresholded
+        cv2.imshow('Thresholded Image', thresholded_img)
+        cv2.imshow('Morfologi Eroded Image', eroded_img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 else:
