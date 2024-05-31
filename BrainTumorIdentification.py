@@ -8,7 +8,7 @@ tumor_no = r"C:\Users\Asgarindo\Downloads\brain_tumor_dataset\no"
 tumor_yes = r"C:\Users\Asgarindo\Downloads\brain_tumor_dataset\yes"
 
 # Fungsi untuk memuat data dari folder dengan resize
-def load_data_with_resize(folder, label, target_size=(300, 300)):
+def load_data_with_resize(folder, target_size=(300, 300)):
     data = []
     for filename in os.listdir(folder):
         img_path = os.path.join(folder, filename)
@@ -16,14 +16,14 @@ def load_data_with_resize(folder, label, target_size=(300, 300)):
         if img is not None:
             # Resize citra
             img_resized = cv2.resize(img, target_size)
-            data.append((img_resized, label))
+            data.append((img_resized))
         else:
             print(f"Gagal membaca gambar: {img_path}")
     return data
 
 # Memuat data dari folder "no" dan "yes" dengan resize
-data_no = load_data_with_resize(tumor_no, 0)
-data_yes = load_data_with_resize(tumor_yes, 1)
+data_no = load_data_with_resize(tumor_no)
+data_yes = load_data_with_resize(tumor_yes)
 
 # Gabungkan data dari kedua folder
 data = data_no + data_yes
@@ -135,25 +135,25 @@ def extract_features(img):
 
     return features
 
-# Memproses semua gambar dalam dataset
-# all_features = []
+# Ambang batas untuk setiap fitur (contoh nilai, sesuaikan dengan dataset Anda)
+thresholds = {
+    'Luas': 500,         # Contoh ambang batas untuk luas
+    'Keliling': 0.5,      # Contoh ambang batas untuk keliling
+    'Metric': 0.3,       # Contoh ambang batas untuk metric
+    'Eccentricity': 0.0  # Contoh ambang batas untuk eccentricity
+}
 
-# for img, label in data:
-#     features = process_image_with_resize(img)
-#     if features:
-#         for feature in features:
-#             feature.append(label)
-#         all_features.extend(features)
-
-# # Buat DataFrame dari semua fitur yang diekstraksi
-# df = pd.DataFrame(all_features, columns=['Luas', 'Keliling', 'Metric', 'Eccentricity', 'Label'])
-
-# # Tampilkan tabel
-# print(df)
+def classify_tumor(features):
+    for feature_values in features:
+        luas = feature_values[0]  # Ambil nilai "Luas" dari setiap gambar
+        if luas > thresholds['Luas']:
+            return 'Tumor'
+    return 'Tidak Tumor'
 
 
 # Contoh pemrosesan satu gambar dari data
-image_path = os.path.join(tumor_yes, 'Y7.jpg')  # Ubah path sesuai lokasi sebenarnya
+image_path = os.path.join(tumor_yes, 'Y8.jpg')  
+# image_path = os.path.join(tumor_no, 'N17.jpg')  
 img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
 if img is not None:
@@ -163,6 +163,10 @@ if img is not None:
     if features:
         print("====================================================")
         df = pd.DataFrame(features, columns=['Luas', 'Keliling', 'Metric', 'Eccentricity'])
+        target = classify_tumor(features)
+        
+        df['target'] = target
+        
         print(df)
         print("====================================================")
 
