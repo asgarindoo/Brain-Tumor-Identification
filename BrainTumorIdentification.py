@@ -44,61 +44,61 @@ def process_image_with_resize(img):
     # Terapkan operasi morfologi (Contoh: Erosi manual)
     kernel_size = (5, 5)
     kernel = np.ones(kernel_size, np.uint8)
-    eroded_img = erode_image(thresholded_img, kernel, iterations=2)
+    eroded_img = manual_erode(thresholded_img, kernel, iterations=2)
 
     # Ekstraksi fitur dari citra yang telah diolah
     features = extract_features(eroded_img)
 
     return features
 
-# Fungsi untuk melakukan operasi morfologi erosi menggunakan OpenCV
-def erode_image(img, kernel, iterations):
-    # Lakukan erosi pada citra menggunakan fungsi cv2.erode
-    eroded_img = cv2.erode(img, kernel, iterations=iterations)
-    return eroded_img
-
-# Fungsi untuk melakukan operasi morfologi erosi manual
-# def manual_erode(img, kernel, iterations=1):
-#     # Mendapatkan dimensi citra
-#     height, width = img.shape
-    
-#     # Mendapatkan dimensi kernel
-#     k_height, k_width = kernel.shape
-    
-#     # Mendapatkan ukuran padding
-#     pad_height = k_height // 2
-#     pad_width = k_width // 2
-    
-#     # Buat citra hasil erosi
-#     eroded_img = np.zeros((height, width), dtype=np.uint8)
-    
-#     # Looping melalui jumlah iterasi
-#     for _ in range(iterations):
-#         # Looping melalui citra
-#         for i in range(pad_height, height - pad_height):
-#             for j in range(pad_width, width - pad_width):
-#                 # Inisialisasi nilai minimum
-#                 min_val = 255
-                
-#                 # Looping melalui kernel
-#                 for m in range(k_height):
-#                     for n in range(k_width):
-#                         # Koordinat citra
-#                         x = i + m - pad_height
-#                         y = j + n - pad_width
-                        
-#                         # Periksa apakah di dalam batas citra
-#                         if x >= 0 and x < height and y >= 0 and y < width:
-#                             # Peroleh nilai minimum
-#                             min_val = min(min_val, img[x, y])
-                
-#                 # Tetapkan nilai minimum sebagai nilai piksel erosi
-#                 eroded_img[i, j] = min_val
-        
-#         # Perbarui citra input dengan citra hasil erosi untuk iterasi selanjutnya
-#         img = eroded_img.copy()
-    
+# # Fungsi untuk melakukan operasi morfologi erosi menggunakan OpenCV
+# def erode_image(img, kernel, iterations):
+#     # Lakukan erosi pada citra menggunakan fungsi cv2.erode
+#     eroded_img = cv2.erode(img, kernel, iterations=iterations)
 #     return eroded_img
+
+#Fungsi untuk melakukan operasi morfologi erosi manual
+def manual_erode(img, kernel, iterations=1):
+    # Mendapatkan dimensi citra
+    height, width = img.shape
+    
+    # Mendapatkan dimensi kernel
+    k_height, k_width = kernel.shape
+    
+    # Mendapatkan ukuran padding
+    pad_height = k_height // 2
+    pad_width = k_width // 2
+    
+    # Buat citra hasil erosi
+    eroded_img = np.zeros((height, width), dtype=np.uint8)
+    
+    # Looping melalui jumlah iterasi
+    for _ in range(iterations):
+        # Looping melalui citra
+        for i in range(pad_height, height - pad_height):
+            for j in range(pad_width, width - pad_width):
+                # Inisialisasi nilai minimum
+                min_val = 255
+                
+                # Looping melalui kernel
+                for m in range(k_height):
+                    for n in range(k_width):
+                        # Koordinat citra
+                        x = i + m - pad_height
+                        y = j + n - pad_width
+                        
+                        # Periksa apakah di dalam batas citra
+                        if x >= 0 and x < height and y >= 0 and y < width:
+                            # Peroleh nilai minimum
+                            min_val = min(min_val, img[x, y])
+                
+                # Tetapkan nilai minimum sebagai nilai piksel erosi
+                eroded_img[i, j] = min_val
+        
+        # Perbarui citra input dengan citra hasil erosi untuk iterasi selanjutnya
+        img = eroded_img.copy()
+    
+    return eroded_img
 
 
 # #Fungsi untuk melakukan ekstraksi fitur manual dari citra
@@ -136,21 +136,21 @@ def extract_features(img):
     return features
 
 # Memproses semua gambar dalam dataset
-all_features = []
+# all_features = []
 
-for img, label in data:
-    features = process_image_with_resize(img)
-    if features:
-        for feature in features:
-            feature.append(label)
-        all_features.extend(features)
+# for img, label in data:
+#     features = process_image_with_resize(img)
+#     if features:
+#         for feature in features:
+#             feature.append(label)
+#         all_features.extend(features)
 
-# Buat DataFrame dari semua fitur yang diekstraksi
-df = pd.DataFrame(all_features, columns=['Luas', 'Keliling', 'Metric', 'Eccentricity', 'Label'])
+# # Buat DataFrame dari semua fitur yang diekstraksi
+# df = pd.DataFrame(all_features, columns=['Luas', 'Keliling', 'Metric', 'Eccentricity', 'Label'])
 
-# Tampilkan tabel
-print(df)
-print("====================================================")
+# # Tampilkan tabel
+# print(df)
+
 
 # Contoh pemrosesan satu gambar dari data
 image_path = os.path.join(tumor_yes, 'Y7.jpg')  # Ubah path sesuai lokasi sebenarnya
@@ -161,8 +161,10 @@ if img is not None:
     features = process_image_with_resize(img)
 
     if features:
+        print("====================================================")
         df = pd.DataFrame(features, columns=['Luas', 'Keliling', 'Metric', 'Eccentricity'])
         print(df)
+        print("====================================================")
 
         # Tampilkan citra-citra yang diproses (opsional)
         cv2.imshow('Original Image', img)
