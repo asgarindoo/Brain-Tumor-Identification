@@ -51,13 +51,7 @@ def process_image_with_resize(img):
 
     return features
 
-# # Fungsi untuk melakukan operasi morfologi erosi menggunakan OpenCV
-# def erode_image(img, kernel, iterations):
-#     # Lakukan erosi pada citra menggunakan fungsi cv2.erode
-#     eroded_img = cv2.erode(img, kernel, iterations=iterations)
-#     return eroded_img
-
-#Fungsi untuk melakukan operasi morfologi erosi manual
+# Fungsi untuk melakukan operasi morfologi erosi manual
 def manual_erode(img, kernel, iterations=1):
     # Mendapatkan dimensi citra
     height, width = img.shape
@@ -100,17 +94,57 @@ def manual_erode(img, kernel, iterations=1):
     
     return eroded_img
 
+# Fungsi untuk menemukan kontur secara manual dari citra biner
+def find_contours_manual(binary_img):
+    contours = []
+    visited = np.zeros_like(binary_img, dtype=bool)
+    height, width = binary_img.shape
 
-# #Fungsi untuk melakukan ekstraksi fitur manual dari citra
+    # Fungsi untuk memeriksa apakah titik (x, y) valid dan belum dikunjungi
+    def is_valid(x, y):
+        return 0 <= x < width and 0 <= y < height and binary_img[y, x] != 0 and not visited[y, x]
+
+    # Pergerakan 8 arah (atas, bawah, kiri, kanan, dan diagonal)
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+
+    for y in range(height):
+        for x in range(width):
+            if is_valid(x, y):
+                # Mulai pelacakan kontur dari titik yang valid
+                contour = []
+                stack = [(x, y)]
+                while stack:
+                    cx, cy = stack.pop()
+                    if is_valid(cx, cy):
+                        visited[cy, cx] = True
+                        contour.append((cx, cy))
+                        # Tambahkan tetangga yang valid ke stack
+                        for dx, dy in directions:
+                            nx, ny = cx + dx, cy + dy
+                            if is_valid(nx, ny):
+                                stack.append((nx, ny))
+                if len(contour) > 0:
+                    contours.append(np.array(contour))
+
+    return contours
+
+# Fungsi untuk melakukan ekstraksi fitur manual dari citra
 def extract_features(img):
-    # Temukan kontur dari citra
-    contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # Temukan kontur dari citra secara manual
+    contours = find_contours_manual(img)
 
     # Buat daftar untuk menyimpan hasil ekstraksi fitur
     features = []
 
     # Iterasi melalui kontur dan ekstrak ciri-ciri
     for contour in contours:
+        if len(contour) < 3:  # Minimum kontur harus memiliki setidaknya 3 titik
+            continue
+        
+        # Konversi kontur ke format yang dapat digunakan oleh cv2 untuk perhitungan area dan perimeter
+        contour = np.array(contour).reshape((-1, 1, 2)).astype(np.int32)
+        
+        # Hitung area dan perimeter dari kontur
         area = cv2.contourArea(contour)
         perimeter = cv2.arcLength(contour, True)
         
@@ -135,25 +169,25 @@ def extract_features(img):
 
     return features
 
-# Ambang batas untuk setiap fitur (contoh nilai, sesuaikan dengan dataset Anda)
 thresholds = {
-    'Luas': 500,         # Contoh ambang batas untuk luas
-    'Keliling': 0.5,      # Contoh ambang batas untuk keliling
-    'Metric': 0.3,       # Contoh ambang batas untuk metric
-    'Eccentricity': 0.0  # Contoh ambang batas untuk eccentricity
+    'Luas': 500,  
+    'Keliling': 500, 
+    'Metric': 1.5, 
+    'Eccentricity': 1.5 
 }
 
 def classify_tumor(features):
     for feature_values in features:
-        luas = feature_values[0]  # Ambil nilai "Luas" dari setiap gambar
-        if luas > thresholds['Luas']:
+        if (feature_values[0] > thresholds['Luas'] or
+            feature_values[1] > thresholds['Keliling'] or
+            feature_values[2] > thresholds['Metric'] or
+            feature_values[3] > thresholds['Eccentricity']):
             return 'Tumor'
     return 'Tidak Tumor'
 
-
 # Contoh pemrosesan satu gambar dari data
-image_path = os.path.join(tumor_yes, 'Y8.jpg')  
-# image_path = os.path.join(tumor_no, 'N17.jpg')  
+# image_path = os.path.join(tumor_yes, 'Y7.jpg')  
+image_path = os.path.join(tumor_no, 'N26.jpg')  
 img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
 if img is not None:
