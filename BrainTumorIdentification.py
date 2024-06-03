@@ -169,29 +169,47 @@ def extract_features(img):
 
     return features
 
-thresholds = {
-    'Luas': 500,  
-    'Keliling': 500, 
-    'Metric': 1.5, 
-    'Eccentricity': 1.5 
-}
-
 def classify_tumor(features):
+    tumor_classification = 'Normal'
+    
+    # Thresholds untuk klasifikasi tumor
+    jinak_thresholds = {
+        'Luas': 500,  
+        'Keliling': 500, 
+        'Metric': 1.5, 
+        'Eccentricity': 1.5 
+    }
+    
+    ganas_thresholds = {
+        'Luas': 1000,  
+        'Keliling': 1000, 
+        'Metric': 2.5, 
+        'Eccentricity': 2.0 
+    }
+
     for feature_values in features:
-        if (feature_values[0] > thresholds['Luas'] or
-            feature_values[1] > thresholds['Keliling'] or
-            feature_values[2] > thresholds['Metric'] or
-            feature_values[3] > thresholds['Eccentricity']):
-            return 'Tumor'
-    return 'Tidak Tumor'
+        if (feature_values[0] > ganas_thresholds['Luas'] or
+            feature_values[1] > ganas_thresholds['Keliling'] or
+            feature_values[2] > ganas_thresholds['Metric'] or
+            feature_values[3] > ganas_thresholds['Eccentricity']):
+            tumor_classification = 'Tumor Ganas'
+            break
+        elif (feature_values[0] > jinak_thresholds['Luas'] or
+              feature_values[1] > jinak_thresholds['Keliling'] or
+              feature_values[2] > jinak_thresholds['Metric'] or
+              feature_values[3] > jinak_thresholds['Eccentricity']):
+            tumor_classification = 'Tumor Jinak'
+            break
+            
+    return tumor_classification
 
 # Contoh pemrosesan satu gambar dari data
-# image_path = os.path.join(tumor_yes, 'Y7.jpg')  
-image_path = os.path.join(tumor_no, 'N26.jpg')  
+image_path = os.path.join(tumor_yes, 'Y6.jpg')  
+# image_path = os.path.join(tumor_no, 'N21.jpg')  
 img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
 if img is not None:
-    # Proses gambar dan ekstrak fitur
+    # Proses gambar dan ekstrak fitur=
     features = process_image_with_resize(img)
 
     if features:
@@ -203,7 +221,7 @@ if img is not None:
         
         print(df)
         print("====================================================")
-
+        
         # Tampilkan citra-citra yang diproses (opsional)
         cv2.imshow('Original Image', img)
         # Menampilkan citra thresholded
